@@ -16,3 +16,5 @@ Our app:
   * a plot synopsis (called overview in the api)
   * user rating (called vote_average in the api)
   * release date
+
+<b>IMPORTANT: Reviewers should insert their API key.</b>
