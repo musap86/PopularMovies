@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Popular Movies</string>
-    <string name="sort_by">Sort by</string>
-    <string name="default_image_desc">Default Image</string>
-    <string name="toggle_toast_message">Changing sorting type.</string>
-    <string name="no_intenet_connection">No internet connection.</string>
+    <string name="movie_details">Movie Details</string>
+    <string name="toggle_sort">Change Sort Order</string>
+    <string name="default_image_desc">Movie Poster</string>
+    <string name="toggle_toast_message">Changing sort order to</string>
+    <string name="most_popular">most popular</string>
+    <string name="top_rated">top rated</string>
+    <string name="no_internet_connection">No internet connection</string>
 </resources>

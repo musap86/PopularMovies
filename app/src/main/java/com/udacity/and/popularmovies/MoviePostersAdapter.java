@@ -8,25 +8,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
-import com.udacity.and.popularmovies.utilities.MovieRequestUtility;
+import com.udacity.and.popularmovies.utilities.JsonUtility;
+import com.udacity.and.popularmovies.utilities.NetworkUtils;
 
 public class MoviePostersAdapter extends RecyclerView.Adapter<MoviePostersAdapter.MoviePostersViewHolder> {
 
-    private int mMoviePosterCount;
-    private String[] mImagePaths;
+    private final ListItemClickListener mOnClickListener;
 
-    private ListItemClickListener mOnClickListener;
-
-    /**
-     * Constructor for MoviePostersAdapter that accepts an array of poster paths to display
-     *
-     * @param imagePaths Paths of posters to display
-     */
-    public MoviePostersAdapter(String[] imagePaths, ListItemClickListener listener) {
-        if (imagePaths == null)
-            return;
-        mMoviePosterCount = imagePaths.length;
-        mImagePaths = imagePaths;
+    public MoviePostersAdapter(ListItemClickListener listener) {
         mOnClickListener = listener;
     }
 
@@ -44,7 +33,7 @@ public class MoviePostersAdapter extends RecyclerView.Adapter<MoviePostersAdapte
 
     @Override
     public int getItemCount() {
-        return mMoviePosterCount;
+        return JsonUtility.getMovieDataLength();
     }
 
     public interface ListItemClickListener {
@@ -52,11 +41,11 @@ public class MoviePostersAdapter extends RecyclerView.Adapter<MoviePostersAdapte
     }
 
     /**
-     * Cache of the children views for a movie poster item.
+     * Cache of the child image view for a movie poster list item.
      */
     class MoviePostersViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
 
-        ImageView moviePosterImageView;
+        private final ImageView moviePosterImageView;
 
         public MoviePostersViewHolder(View itemView) {
             super(itemView);
@@ -64,9 +53,19 @@ public class MoviePostersAdapter extends RecyclerView.Adapter<MoviePostersAdapte
             itemView.setOnClickListener(this);
         }
 
+        /**
+         * Shows corresponding poster image for each movie item in recycler view unless no movie
+         * poster image is provided.
+         * For a few of the movies the server returns a json response in which there is a
+         * "null" statement instead of a path for an image file.
+         */
         void bind(int pos) {
-            String posterImagePath = MovieRequestUtility.buildUrlString(mImagePaths[pos]);
-            Picasso.with(itemView.getContext()).load(posterImagePath).into(moviePosterImageView);
+            if (JsonUtility.getImagePath(pos).equals("null")) {
+                moviePosterImageView.setImageResource(R.drawable.no_poster_image);
+            } else {
+                String imageUrlString = NetworkUtils.getImageUrlString(JsonUtility.getImagePath(pos));
+                Picasso.with(itemView.getContext()).load(imageUrlString).into(moviePosterImageView);
+            }
         }
 
         @Override

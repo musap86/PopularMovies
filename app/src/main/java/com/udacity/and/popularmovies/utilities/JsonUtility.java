@@ -6,10 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by Musap Kahraman on 27.02.2018.
- */
-
 public class JsonUtility {
 
     private static String[] sTitles;
@@ -38,12 +34,20 @@ public class JsonUtility {
         return sImagePaths[index];
     }
 
-    public static String[] getImagePathsFromJson(String json) {
-        String[] imagePaths = null;
+    public static int getMovieDataLength() {
+        if (sTitles == null)
+            return 0;
+        else
+            return sTitles.length;
+    }
+
+    /**
+     * Populates data for the static variables of the class by extracting the given JSON string.
+     */
+    public static void extractMovieDataFromJson(String json) {
         try {
             JSONObject jsonObject = new JSONObject(json);
             JSONArray jsonArray = jsonObject.optJSONArray("results");
-            imagePaths = new String[jsonArray.length()];
             sImagePaths = new String[jsonArray.length()];
             sTitles = new String[jsonArray.length()];
             sReleaseDates = new String[jsonArray.length()];
@@ -51,7 +55,7 @@ public class JsonUtility {
             sPlots = new String[jsonArray.length()];
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject result = jsonArray.optJSONObject(i);
-                sImagePaths[i] = imagePaths[i] = result.optString("poster_path");
+                sImagePaths[i] = result.optString("poster_path");
                 sTitles[i] = result.optString("title");
                 sReleaseDates[i] = result.optString("release_date");
                 sAverageVotes[i] = result.optString("vote_average");
@@ -60,6 +64,5 @@ public class JsonUtility {
         } catch (JSONException e) {
             Log.e("JsonUtility", e.getMessage());
         }
-        return imagePaths;
     }
 }

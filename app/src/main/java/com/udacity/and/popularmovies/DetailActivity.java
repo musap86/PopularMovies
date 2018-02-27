@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.udacity.and.popularmovies.utilities.JsonUtility;
-import com.udacity.and.popularmovies.utilities.MovieRequestUtility;
+import com.udacity.and.popularmovies.utilities.NetworkUtils;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -20,7 +20,7 @@ public class DetailActivity extends AppCompatActivity {
 
         ImageView poster = findViewById(R.id.iv_detail_movie_poster);
 
-        String posterImagePath = MovieRequestUtility.buildUrlString(JsonUtility.getImagePath(index));
+        String posterImagePath = NetworkUtils.getImageUrlString(JsonUtility.getImagePath(index));
         Picasso.with(this).load(posterImagePath).into(poster);
 
         TextView textViewTitle = findViewById(R.id.tv_title);

@@ -13,36 +13,42 @@ import android.widget.Toast;
 
 import com.udacity.and.popularmovies.data.MoviesPreferences;
 import com.udacity.and.popularmovies.utilities.JsonUtility;
-import com.udacity.and.popularmovies.utilities.MovieRequestUtility;
+import com.udacity.and.popularmovies.utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+
 public class MainActivity extends AppCompatActivity implements MoviePostersAdapter.ListItemClickListener {
 
-    private static final int POSTERS_GRID_COLUMN_COUNT = 3;
     private MoviePostersAdapter mAdapter;
     private RecyclerView mMoviePosters;
+    private StringBuilder mStringBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mStringBuilder = new StringBuilder();
         mMoviePosters = findViewById(R.id.rv_movie_posters);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(this, POSTERS_GRID_COLUMN_COUNT);
+        int posterGridColCount = 2;
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE)
+            posterGridColCount = 3;
+        GridLayoutManager layoutManager = new GridLayoutManager(this, posterGridColCount);
+
         mMoviePosters.setLayoutManager(layoutManager);
         mMoviePosters.setHasFixedSize(true);
-        mAdapter = new MoviePostersAdapter(null, MainActivity.this);
+        mAdapter = new MoviePostersAdapter(MainActivity.this);
         mMoviePosters.setAdapter(mAdapter);
-
         loadMoviesData();
     }
 
     public void loadMoviesData() {
-        if (!MovieRequestUtility.isOnline(this)) {
-            Toast.makeText(this, R.string.no_intenet_connection, Toast.LENGTH_SHORT).show();
+        if (!NetworkUtils.isOnline(this)) {
+            Toast.makeText(this, R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
             return;
         }
         new FetchMoviesData().execute();
@@ -58,34 +64,34 @@ public class MainActivity extends AppCompatActivity implements MoviePostersAdapt
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.sort_by) {
             MoviesPreferences.toggleSortingType();
-            Toast.makeText(this, R.string.toggle_toast_message, Toast.LENGTH_SHORT).show();
+            mStringBuilder.delete(0, mStringBuilder.length()).append(getString(R.string.toggle_toast_message));
+            if (MoviesPreferences.getSortingType() == NetworkUtils.MOST_POPULAR)
+                mStringBuilder.append(" ").append(getString(R.string.most_popular));
+            else
+                mStringBuilder.append(" ").append(getString(R.string.top_rated));
+            Toast.makeText(this, mStringBuilder.toString(), Toast.LENGTH_SHORT).show();
             loadMoviesData();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public class FetchMoviesData extends AsyncTask<String, Void, String[]> {
+    public class FetchMoviesData extends AsyncTask<String, Void, String> {
 
         @Override
-        protected String[] doInBackground(String... params) {
-
-            URL movieRequestUrl = MovieRequestUtility.buildUrl(MoviesPreferences.getSortingType());
-
+        protected String doInBackground(String... params) {
+            URL movieRequestUrl = NetworkUtils.getListingUrl(MoviesPreferences.getSortingType());
             try {
-                String jsonResponse = MovieRequestUtility.getResponseFromHttpUrl(movieRequestUrl);
-                return JsonUtility.getImagePathsFromJson(jsonResponse);
+                return NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -93,9 +99,10 @@ public class MainActivity extends AppCompatActivity implements MoviePostersAdapt
         }
 
         @Override
-        protected void onPostExecute(String[] data) {
+        protected void onPostExecute(String data) {
             if (data != null) {
-                mAdapter = new MoviePostersAdapter(data, MainActivity.this);
+                JsonUtility.extractMovieDataFromJson(data);
+                mAdapter = new MoviePostersAdapter(MainActivity.this);
                 mMoviePosters.setAdapter(mAdapter);
             }
         }

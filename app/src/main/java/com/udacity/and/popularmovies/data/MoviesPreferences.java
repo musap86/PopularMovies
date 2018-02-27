@@ -1,23 +1,28 @@
 package com.udacity.and.popularmovies.data;
 
-import com.udacity.and.popularmovies.utilities.MovieRequestUtility;
+import com.udacity.and.popularmovies.utilities.NetworkUtils;
 
 /**
- * Created by Musap Kahraman on 27.02.2018.
+ * Caches the preference to view posters by popularity or rating.
  */
-
 public class MoviesPreferences {
 
-    private static boolean isSortingByRating;
+    private static boolean isSortByPopularity;
 
-    public static int getSortingType() {
-        if (isSortingByRating)
-            return MovieRequestUtility.TYPE_HIGHEST_RATED;
-        else
-            return MovieRequestUtility.TYPE_MOST_POPULAR;
+    /**
+     * Changes the opted type of sorting.
+     */
+    public static void toggleSortingType() {
+        isSortByPopularity = !isSortByPopularity;
     }
 
-    public static void toggleSortingType() {
-        isSortingByRating = !isSortingByRating;
+    /**
+     * Returns the already opted type of sorting.
+     */
+    public static int getSortingType() {
+        if (isSortByPopularity)
+            return NetworkUtils.MOST_POPULAR;
+        else
+            return NetworkUtils.TOP_RATED;
     }
 }
